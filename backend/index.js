@@ -13,7 +13,7 @@ const server = http.createServer(app);
 
 connect();
 app.use(express.json());
-app.use(cors({ origin: process.env.CLIENT_ORIGIN }));
+app.use(cors());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/rooms", roomRoutes);
