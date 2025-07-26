@@ -90,41 +90,76 @@ router.post("/login", async (req, res) => {
 
 router.post("/guest", async (req, res) => {
   try {
+    console.log("=== GUEST LOGIN START ===");
+    console.log("Request body:", req.body);
+    console.log("Database connection state:", mongoose.connection.readyState);
+
     const { username } = req.body;
 
     if (!username || username.length < 3) {
+      console.log("Username validation failed:", username);
       return res
         .status(400)
         .json({ error: "Username must be at least 3 characters long" });
     }
 
+    console.log("Checking for existing user:", username);
     const existingUser = await User.findOne({ username });
+    console.log("Existing user found:", !!existingUser);
+
     if (existingUser) {
       return res.status(400).json({ error: "Username already taken" });
     }
 
+    console.log("Creating new guest user...");
     const guestUser = new User({
       username,
       isGuest: true,
-      password: null, // Ensure your User model allows password to be null
+      // Don't set password at all, let it be undefined
     });
 
-    await guestUser.save();
+    console.log("Guest user object created:", {
+      username: guestUser.username,
+      isGuest: guestUser.isGuest,
+      password: guestUser.password,
+    });
 
-    const token = generateToken(guestUser._id); // Check this function carefully
+    console.log("Attempting to save user...");
+    const savedUser = await guestUser.save();
+    console.log("User saved successfully with ID:", savedUser._id);
 
+    console.log("Generating token...");
+    const token = generateToken(savedUser._id);
+    console.log("Token generated successfully");
+
+    console.log("=== GUEST LOGIN SUCCESS ===");
     res.json({
       message: "Guest login successful",
       token,
       user: {
-        id: guestUser._id,
-        username: guestUser.username,
-        isGuest: guestUser.isGuest,
+        id: savedUser._id,
+        username: savedUser.username,
+        isGuest: savedUser.isGuest,
       },
     });
   } catch (error) {
-    console.error("Guest login error:", error);
-    res.status(500).json({ error: "Server error during guest login" });
+    console.error("=== GUEST LOGIN ERROR ===");
+    console.error("Error name:", error.name);
+    console.error("Error message:", error.message);
+    console.error("Error code:", error.code);
+    console.error("Full error:", error);
+
+    if (error.errors) {
+      console.error("Validation errors:");
+      Object.keys(error.errors).forEach((key) => {
+        console.error(`${key}:`, error.errors[key].message);
+      });
+    }
+
+    res.status(500).json({
+      error: "Server error during guest login",
+      details: error.message, // Remove this in production
+    });
   }
 });
 
