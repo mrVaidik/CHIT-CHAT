@@ -1,4 +1,4 @@
-import { API_URL } from "../config/config";
+const API_URL = import.meta.env.VITE_APP_API_URL;
 
 export const validateToken = async (token) => {
   const response = await fetch(`${API_URL}/api/auth/me`, {

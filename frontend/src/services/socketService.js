@@ -1,5 +1,6 @@
 import io from "socket.io-client";
-import { SOCKET_URL } from "../config/config";
+
+const SOCKET_URL = import.meta.env.VITE_APP_SOCKET_URL;
 
 export const createSocket = (token) => {
   return io(SOCKET_URL, {
