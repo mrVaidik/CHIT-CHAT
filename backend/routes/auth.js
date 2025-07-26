@@ -92,6 +92,7 @@ router.post("/login", async (req, res) => {
 router.post("/guest", async (req, res) => {
   try {
     const { username } = req.body;
+    console.log("Received username:", username);
 
     if (!username || username.length < 3) {
       return res
@@ -99,19 +100,26 @@ router.post("/guest", async (req, res) => {
         .json({ error: "Username must be at least 3 characters long" });
     }
 
+    console.log("Checking for existing user...");
     const existingUser = await User.findOne({ username });
     if (existingUser) {
       return res.status(400).json({ error: "Username already taken" });
     }
 
+    console.log("Creating new guest user object...");
     const guestUser = new User({
       username,
       isGuest: true,
-      password: null,
+      password: null, // Ensure your User model allows password to be null
     });
 
+    console.log("Saving guest user to database...");
     await guestUser.save();
-    const token = generateToken(guestUser._id);
+    console.log("Guest user saved:", guestUser);
+
+    console.log("Generating token...");
+    const token = generateToken(guestUser._id); // Check this function carefully
+    console.log("Token generated.");
 
     res.json({
       message: "Guest login successful",
@@ -123,7 +131,7 @@ router.post("/guest", async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Guest login error:", error);
+    console.error("Guest login error:", error); // This is where the actual error message will be!
     res.status(500).json({ error: "Server error during guest login" });
   }
 });
