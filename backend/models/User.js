@@ -9,9 +9,19 @@ const UserSchema = new mongoose.Schema({
     minlength: 3,
     maxlength: 20,
   },
-  password: { type: String, required: false, minlength: 6 },
-  isGuest: { type: Boolean, default: false },
-  createdAt: { type: Date, default: Date.now },
+  password: {
+    type: String,
+    required: false,
+    minlength: 6,
+  },
+  isGuest: {
+    type: Boolean,
+    default: false,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 export default mongoose.model("User", UserSchema);
